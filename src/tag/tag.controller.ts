@@ -6,7 +6,10 @@ export class TagController {
   constructor(private readonly tagService: TagService) {}
 
   @Get()
-  public findAll() {
-    return this.tagService.findAll();
+  public async findAll() {
+    const tags = await this.tagService.findAll();
+    return {
+      tags: tags.map((tag) => tag.name),
+    };
   }
 }
