@@ -66,6 +66,10 @@ export class UserService {
     return user;
   }
 
+  public async findById(id: number) {
+    return await this.userRepository.findOne({ id });
+  }
+
   public buildUserResponse(user: UserEntity): UserResponseInterface {
     return {
       user: {
