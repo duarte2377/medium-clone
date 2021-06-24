@@ -5,9 +5,10 @@ import { AppController } from '@app/app.controller';
 import { TagModule } from '@app/tag/tag.module';
 import { UserModule } from '@app/user/user.module';
 import { AuthMiddleware } from '@app/user/middlewares/auth.middleware';
+import { ArticleModule } from '@app/article/article.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(), TagModule, UserModule],
+  imports: [TypeOrmModule.forRoot(), TagModule, UserModule, ArticleModule],
   controllers: [AppController],
   providers: [AppService],
 })
