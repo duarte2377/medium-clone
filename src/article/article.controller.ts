@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   UseGuards,
   UsePipes,
   ValidationPipe,
@@ -50,5 +51,21 @@ export class ArticleController {
     @Param('slug') slug,
   ): Promise<DeleteResult> {
     return await this.articleService.deleteArticle(slug, currentUserId);
+  }
+
+  @Put(':slug')
+  @UseGuards(AuthGuard)
+  @UsePipes(ValidationPipe)
+  public async updateArticle(
+    @User('id') currentUserId: number,
+    @Param('slug') slug,
+    @Body('article') updateArticleDto: CreateArticleDto,
+  ): Promise<ArticleResponseInterface> {
+    const article = await this.articleService.updateArticle(
+      slug,
+      currentUserId,
+      updateArticleDto,
+    );
+    return this.articleService.buildArticleResponse(article);
   }
 }

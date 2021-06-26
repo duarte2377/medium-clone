@@ -5,7 +5,6 @@ import { ArticleEntity } from '@app/article/article.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
 import slugify from 'slugify';
-import * as Http from 'http';
 
 @Injectable()
 export class ArticleService {
@@ -50,6 +49,30 @@ export class ArticleService {
     }
 
     return await this.articleRepository.delete({ slug });
+  }
+
+  public async updateArticle(
+    slug: string,
+    currentUserId: number,
+    updateArticleDto: CreateArticleDto,
+  ): Promise<ArticleEntity> {
+    const article = await this.findBySlug(slug);
+
+    if (!article) {
+      throw new HttpException('Article does not exist', HttpStatus.NOT_FOUND);
+    }
+
+    if (article.author.id !== currentUserId) {
+      throw new HttpException('You are not an author', HttpStatus.FORBIDDEN);
+    }
+
+    Object.assign(article, updateArticleDto);
+
+    if (updateArticleDto.title) {
+      article.slug = this.getSlug(updateArticleDto.title);
+    }
+
+    return await this.articleRepository.save(article);
   }
 
   public buildArticleResponse(article: ArticleEntity) {
