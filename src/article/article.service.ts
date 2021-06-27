@@ -48,7 +48,7 @@ export class ArticleService {
 
       const ids = author.favorites.map((article) => article.id);
       if (ids.length) {
-        queryBuilder.andWhere('articles.authorId IN (:...ids)', { ids });
+        queryBuilder.andWhere('articles.id IN (:...ids)', { ids });
       } else {
         queryBuilder.andWhere('1=0');
       }
