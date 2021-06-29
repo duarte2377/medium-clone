@@ -7,6 +7,8 @@ import { DeleteResult, getRepository, Repository } from 'typeorm';
 import slugify from 'slugify';
 import { ArticlesResponseInterface } from '@app/article/types/articlesResponse.interface';
 import { FollowEntity } from '@app/profile/follow.entity';
+import { CommentEntity } from '@app/article/comment.entity';
+import { AddCommentDto } from '@app/article/dto/addComment.dto';
 
 @Injectable()
 export class ArticleService {
@@ -17,6 +19,8 @@ export class ArticleService {
     private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(FollowEntity)
     private readonly followRepository: Repository<FollowEntity>,
+    @InjectRepository(CommentEntity)
+    private readonly commentRepository: Repository<CommentEntity>,
   ) {}
 
   public async getFeed(
@@ -183,6 +187,29 @@ export class ArticleService {
     return await this.articleRepository.save(article);
   }
 
+  public async addComment(
+    articleSlug: string,
+    currentUser: UserEntity,
+    addCommentDto: AddCommentDto,
+  ): Promise<CommentEntity> {
+    const article = await this.findBySlug(articleSlug);
+
+    if (!article) {
+      throw new HttpException(
+        'This article does not exist',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const comment = new CommentEntity();
+    Object.assign(comment, addCommentDto);
+
+    comment.article = article;
+    comment.author = currentUser;
+
+    return await this.commentRepository.save(comment);
+  }
+
   public async addArticleToFavorites(
     slug: string,
     currentUserId: number,
@@ -230,6 +257,14 @@ export class ArticleService {
 
   public buildArticleResponse(article: ArticleEntity) {
     return { article };
+  }
+
+  public buildCommentResponse(comment: CommentEntity) {
+    return { comment };
+  }
+
+  public buildCommentsResponse(comments: CommentEntity[]) {
+    return { comments };
   }
 
   private getSlug(title: string): string {

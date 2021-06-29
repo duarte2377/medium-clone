@@ -19,6 +19,8 @@ import { ArticleResponseInterface } from '@app/article/types/articleResponse.int
 import { DeleteResult } from 'typeorm';
 import { ArticlesResponseInterface } from '@app/article/types/articlesResponse.interface';
 import { BackendValidationPipe } from '@app/shared/pipes/backendValidation.pipe';
+import { CommentResponseInterface } from '@app/article/types/commentResponse.interface';
+import { AddCommentDto } from '@app/article/dto/addComment.dto';
 
 @Controller('articles')
 export class ArticleController {
@@ -86,6 +88,22 @@ export class ArticleController {
       updateArticleDto,
     );
     return this.articleService.buildArticleResponse(article);
+  }
+
+  @Post(':slug/comments')
+  @UseGuards(AuthGuard)
+  @UsePipes(BackendValidationPipe)
+  public async addComment(
+    @User() currentUser: UserEntity,
+    @Param('slug') articleSlug,
+    @Body('comment') addCommentDto: AddCommentDto,
+  ): Promise<CommentResponseInterface> {
+    const comment = await this.articleService.addComment(
+      articleSlug,
+      currentUser,
+      addCommentDto,
+    );
+    return this.articleService.buildCommentResponse(comment);
   }
 
   @Post(':slug/favorite')
