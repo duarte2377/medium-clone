@@ -90,6 +90,15 @@ export class ArticleController {
     return this.articleService.buildArticleResponse(article);
   }
 
+  @Get(':slug/comments')
+  public async getCommentsFromAnArticle(@Param('slug') articleSlug) {
+    const comments = await this.articleService.getCommentsFromAnArticle(
+      articleSlug,
+    );
+
+    return this.articleService.buildCommentsResponse(comments);
+  }
+
   @Post(':slug/comments')
   @UseGuards(AuthGuard)
   @UsePipes(BackendValidationPipe)

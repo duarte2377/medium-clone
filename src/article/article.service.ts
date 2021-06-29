@@ -3,7 +3,12 @@ import { UserEntity } from '@app/user/user.entity';
 import { CreateArticleDto } from '@app/article/dto/createArticle.dto';
 import { ArticleEntity } from '@app/article/article.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, getRepository, Repository } from 'typeorm';
+import {
+  DeleteResult,
+  FindOneOptions,
+  getRepository,
+  Repository,
+} from 'typeorm';
 import slugify from 'slugify';
 import { ArticlesResponseInterface } from '@app/article/types/articlesResponse.interface';
 import { FollowEntity } from '@app/profile/follow.entity';
@@ -142,8 +147,11 @@ export class ArticleService {
     return await this.articleRepository.save(article);
   }
 
-  public async findBySlug(slug: string): Promise<ArticleEntity> {
-    return await this.articleRepository.findOne({ slug });
+  public async findBySlug(
+    slug: string,
+    options?: FindOneOptions,
+  ): Promise<ArticleEntity> {
+    return await this.articleRepository.findOne({ slug }, options);
   }
 
   public async deleteArticle(
@@ -185,6 +193,18 @@ export class ArticleService {
     }
 
     return await this.articleRepository.save(article);
+  }
+
+  public async getCommentsFromAnArticle(articleSlug: string) {
+    const article = await this.findBySlug(articleSlug, {
+      relations: ['comments'],
+    });
+
+    if (!article) {
+      throw new HttpException('Article does not exist', HttpStatus.NOT_FOUND);
+    }
+
+    return await this.commentRepository.find({ article });
   }
 
   public async addComment(
