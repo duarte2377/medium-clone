@@ -194,11 +194,15 @@ export class ArticleService {
   ): Promise<CommentEntity> {
     const article = await this.findBySlug(articleSlug);
 
-    if (!article) {
+    if (!addCommentDto) {
       throw new HttpException(
-        'This article does not exist',
-        HttpStatus.NOT_FOUND,
+        'Need to send comment data',
+        HttpStatus.BAD_REQUEST,
       );
+    }
+
+    if (!article) {
+      throw new HttpException('Article does not exist', HttpStatus.NOT_FOUND);
     }
 
     const comment = new CommentEntity();
@@ -208,6 +212,32 @@ export class ArticleService {
     comment.author = currentUser;
 
     return await this.commentRepository.save(comment);
+  }
+
+  public async deleteComment(
+    slug: string,
+    currentUserId: number,
+    commentId: number,
+  ): Promise<DeleteResult> {
+    const article = await this.findBySlug(slug);
+
+    if (!article) {
+      throw new HttpException('Article does not exist', HttpStatus.NOT_FOUND);
+    }
+
+    const comment = await this.commentRepository.findOne(commentId, {
+      relations: ['author'],
+    });
+
+    if (!comment) {
+      throw new HttpException('Comment does not exist', HttpStatus.NOT_FOUND);
+    }
+
+    if (comment.author.id !== currentUserId) {
+      throw new HttpException('You are not an author', HttpStatus.FORBIDDEN);
+    }
+
+    return await this.commentRepository.delete(commentId);
   }
 
   public async addArticleToFavorites(

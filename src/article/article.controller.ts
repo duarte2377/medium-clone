@@ -106,6 +106,20 @@ export class ArticleController {
     return this.articleService.buildCommentResponse(comment);
   }
 
+  @Delete(':slug/comments/:id')
+  @UseGuards(AuthGuard)
+  public async deleteComment(
+    @User('id') currentUserId: number,
+    @Param('slug') slug,
+    @Param('id') commentId,
+  ): Promise<DeleteResult> {
+    return await this.articleService.deleteComment(
+      slug,
+      currentUserId,
+      commentId,
+    );
+  }
+
   @Post(':slug/favorite')
   @UseGuards(AuthGuard)
   public async addArticleToFavorites(
